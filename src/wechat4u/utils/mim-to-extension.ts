@@ -1,5 +1,3 @@
-import {fileTypeFromBuffer} from 'file-type'
-
 interface MimeToExtensionMap {
   [key: string]: string;
 }
@@ -17,9 +15,4 @@ const mimeToExtension: MimeToExtensionMap = {
 
 export function getExtensionFromMimeType(mimeType: string): string | undefined {
   return mimeToExtension[mimeType]
-}
-
-
-export async function getFileTypeFromBuffer(buffer: Buffer) {
-  return await fileTypeFromBuffer(buffer)
 }
