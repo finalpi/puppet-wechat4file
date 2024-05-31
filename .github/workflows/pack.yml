@@ -47,12 +47,8 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload release asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./*.tgz
-          asset_name: ${{ github.event.repository.name }}-${{ github.ref_name }}.tgz
-          asset_content_type: application/gzip
+          name: node-package
+          path: "*.tgz"
