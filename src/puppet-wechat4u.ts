@@ -51,7 +51,7 @@ import {parseAppmsgMessagePayload} from './wechat4u/messages/message-appmsg.js'
 import {wechat4uContactToWechaty} from './wechat4u/schema-mapper/contact.js'
 import {wechat4uRoomMemberToWechaty, wechat4uRoomToWechaty} from './wechat4u/schema-mapper/room.js'
 import {isRoomId} from './wechat4u/utils/is-type.js'
-import {getExtensionFromMimeType} from './wechat4u/utils/mim-to-extension.js'
+import {getExtensionFromBuffer, getExtensionFromMimeType} from './wechat4u/utils/mim-to-extension.js'
 
 const MEMORY_SLOT_NAME = 'PUPPET-WECHAT4U'
 
@@ -655,12 +655,12 @@ export class PuppetWechat4u extends PUPPET.Puppet {
 
       case PUPPET.types.Message.Emoticon: {
         /**
-         * 图片消息
+         * 表情消息
          */
         const msg = await this.wechat4u.getMsgImg(rawPayload.MsgId)
-        // 这里都是jpeg 没用
-        const fileExt = getExtensionFromMimeType(msg.data) || 'jpg'
-        filename = `${rawPayload.MsgId}.${fileExt}`
+        const fileExt = await getExtensionFromBuffer(msg.data)
+        const ext = fileExt?.ext || 'jpg'
+        filename = `${rawPayload.MsgId}.${ext}`
 
         const file = FileBox.fromBuffer(
           msg.data,
