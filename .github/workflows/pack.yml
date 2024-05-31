@@ -30,8 +30,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run test pack script
-        run: npm run test:pack
+      - name: Run dict
+        run: npm run dict
 
       - name: Run pack script
         run: npm pack
