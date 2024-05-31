@@ -32,7 +32,9 @@ jobs:
         run: npm run dist
 
       - name: Run pack script
-        run: npm pack
+        run: |
+          tarball=$(npm pack)
+          echo "TARBALL_NAME=$tarball" >> $GITHUB_ENV
 
       - name: Create release
         id: create_release
@@ -49,8 +51,8 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: '*.tgz'
-          asset_name: Release ${{ github.ref }}.tgz
+          file: ${{ env.TARBALL_NAME }}
+          asset_name: ${{ env.TARBALL_NAME }}
           tag: ${{ github.ref }}
           overwrite: true
           body: "This is my release text"
