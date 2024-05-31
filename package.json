@@ -69,6 +69,7 @@
   "dependencies": {
     "@alloc/quick-lru": "^5.2.0",
     "fast-xml-parser": "^3.21.1",
+    "file-type": "^19.0.0",
     "promise-retry": "^2.0.1",
     "wechat4u": "^0.7.14",
     "xml2js": "^0.4.23"
