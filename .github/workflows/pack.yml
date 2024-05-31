@@ -45,8 +45,12 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          name: node-package
-          path: "*.tgz"
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: '*.tgz'
+          asset_name: Release ${{ github.ref }}.tgz
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: "This is my release text"
