@@ -658,6 +658,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
          * 图片消息
          */
         const msg = await this.wechat4u.getMsgImg(rawPayload.MsgId)
+        // 这里都是jgeg 没用
         const fileExt = getExtensionFromMimeType(msg.data) || 'jpg'
         filename = `${rawPayload.MsgId}.${fileExt}`
 
