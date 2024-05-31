@@ -31,7 +31,7 @@ jobs:
         run: npm install
 
       - name: Run dict
-        run: npm run dict
+        run: npm run dist
 
       - name: Run pack script
         run: npm pack
