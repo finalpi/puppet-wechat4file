@@ -51,7 +51,7 @@ import {parseAppmsgMessagePayload} from './wechat4u/messages/message-appmsg.js'
 import {wechat4uContactToWechaty} from './wechat4u/schema-mapper/contact.js'
 import {wechat4uRoomMemberToWechaty, wechat4uRoomToWechaty} from './wechat4u/schema-mapper/room.js'
 import {isRoomId} from './wechat4u/utils/is-type.js'
-import {getFileTypeFromBuffer, getExtensionFromMimeType} from './wechat4u/utils/mim-to-extension.js'
+import {getExtensionFromMimeType} from './wechat4u/utils/mim-to-extension.js'
 
 const MEMORY_SLOT_NAME = 'PUPPET-WECHAT4U'
 
@@ -658,9 +658,8 @@ export class PuppetWechat4u extends PUPPET.Puppet {
          * 图片消息
          */
         const msg = await this.wechat4u.getMsgImg(rawPayload.MsgId)
-        const fileExt = await getFileTypeFromBuffer(msg.data)
-        const extensionFromData = fileExt?.ext || 'jpg'
-        filename = `${rawPayload.MsgId}.${extensionFromData}`
+        const fileExt = getExtensionFromMimeType(msg.data) || 'jpg'
+        filename = `${rawPayload.MsgId}.${fileExt}`
 
         const file = FileBox.fromBuffer(
           msg.data,
