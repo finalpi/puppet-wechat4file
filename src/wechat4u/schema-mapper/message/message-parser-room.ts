@@ -1,10 +1,10 @@
 import type * as PUPPET from 'wechaty-puppet'
-import { isRoomId, isContactId } from '../../utils/is-type.js'
-import type { MessageParser, MessageParserContext } from './message-parser.js'
-import type { WebMessageRawPayload } from '../../../web-schemas'
-import { parseMentionIdList } from '../../utils/parse-mention-id-list.js'
+import {isRoomId, isContactId} from '../../utils/is-type.js'
+import type {MessageParser, MessageParserContext} from './message-parser.js'
+import type {WebMessageRawPayload} from '../../../web-schemas'
+import {parseMentionIdList} from '../../utils/parse-mention-id-list.js'
 
-async function roomMessageSentByOthers (webMessageRawPayload: WebMessageRawPayload, ret: PUPPET.payloads.Message) {
+async function roomMessageSentByOthers(webMessageRawPayload: WebMessageRawPayload, ret: PUPPET.payloads.Message) {
   let roomId: string | undefined
   if (isRoomId(webMessageRawPayload.FromUserName)) {
     roomId = webMessageRawPayload.FromUserName
@@ -29,14 +29,9 @@ async function roomMessageSentByOthers (webMessageRawPayload: WebMessageRawPaylo
     if (separatorIndex !== -1) {
       const takerIdPrefix = webMessageRawPayload.OriginalContent.slice(0, separatorIndex)
       ret.talkerId = takerIdPrefix
-      let text: string|undefined = ''
-      const parts = webMessageRawPayload.Content.split(':\n')
-      if (parts.length > 1) {
-        text = parts[1]
-      } else {
-        text = webMessageRawPayload.Content
-      }
-      ret.text = text
+      const content = webMessageRawPayload.Content;
+      const start = content.indexOf(':\n') + 2;
+      ret.text = start > 1 ? content.substring(start) : content;
     } else {
       /**
        * Message that can not get talkerId from payload:
@@ -51,7 +46,7 @@ async function roomMessageSentByOthers (webMessageRawPayload: WebMessageRawPaylo
   }
 }
 
-async function roomMessageSentBySelf (webMessageRawPayload: WebMessageRawPayload, ret: PUPPET.payloads.Message) {
+async function roomMessageSentBySelf(webMessageRawPayload: WebMessageRawPayload, ret: PUPPET.payloads.Message) {
   let talkerId: string | undefined
   let roomId: string | undefined
 
@@ -78,15 +73,7 @@ async function roomMessageSentBySelf (webMessageRawPayload: WebMessageRawPayload
     // room message sent by self
     ret.roomId = roomId
     ret.talkerId = talkerId
-
-    let text: string|undefined = ''
-    const parts = webMessageRawPayload.Content.split(':\n')
-    if (parts.length > 1) {
-      text = parts[1]
-    } else {
-      text = webMessageRawPayload.Content
-    }
-    ret.text = text
+    ret.text = webMessageRawPayload.Content || ''
   }
 }
 
