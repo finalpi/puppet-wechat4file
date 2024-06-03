@@ -73,7 +73,7 @@ async function roomMessageSentBySelf(webMessageRawPayload: WebMessageRawPayload,
     // room message sent by self
     ret.roomId = roomId
     ret.talkerId = talkerId
-    ret.text = webMessageRawPayload.Content || ''
+    ret.text = webMessageRawPayload.Content;
   }
 }
 
