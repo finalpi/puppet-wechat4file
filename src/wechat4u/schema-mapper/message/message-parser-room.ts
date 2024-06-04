@@ -30,8 +30,14 @@ async function roomMessageSentByOthers(webMessageRawPayload: WebMessageRawPayloa
       const takerIdPrefix = webMessageRawPayload.OriginalContent.slice(0, separatorIndex)
       ret.talkerId = takerIdPrefix
       const content = webMessageRawPayload.Content;
-      const start = content.indexOf(':\n') + 2;
-      ret.text = start > 1 ? content.substring(start) : content;
+      let text: string | undefined = ''
+      const split = content.split(/^.+:\n/)
+      if (split.length > 1) {
+        text = split[1]
+      } else {
+        text = content
+      }
+      ret.text = text
     } else {
       /**
        * Message that can not get talkerId from payload:
@@ -75,7 +81,7 @@ async function roomMessageSentBySelf(webMessageRawPayload: WebMessageRawPayload,
     ret.talkerId = talkerId
     const content = webMessageRawPayload.Content;
     let text: string | undefined = ''
-    const split = content.split(/^@?\d+:\n/)
+    const split = content.split(/^.+:\n/)
     if (split.length > 1) {
       text = split[1]
     } else {
