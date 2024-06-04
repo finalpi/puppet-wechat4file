@@ -73,7 +73,15 @@ async function roomMessageSentBySelf(webMessageRawPayload: WebMessageRawPayload,
     // room message sent by self
     ret.roomId = roomId
     ret.talkerId = talkerId
-    ret.text = webMessageRawPayload.Content;
+    const content = webMessageRawPayload.Content;
+    let text: string | undefined = ''
+    const split = content.split(/^@?\d+:\n/)
+    if (split.length > 1) {
+      text = split[1]
+    } else {
+      text = content
+    }
+    ret.text = text
   }
 }
 
