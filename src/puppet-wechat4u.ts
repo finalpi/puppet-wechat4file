@@ -32,6 +32,7 @@ import {
 } from './config.js'
 
 import {
+  WebAppMsgType,
   WebContactRawPayload,
   WebMessageRawPayload,
   WebMessageType,
@@ -311,6 +312,24 @@ export class PuppetWechat4u extends PUPPET.Puppet {
 
     log.verbose('PuppetWeChat', 'readyStable() emit(ready)')
     this.emit('ready', {data: 'stable'})
+  }
+
+  private async sendMessageHandler(msg: WebMessageRawPayload) {
+    if (!msg.MsgId) {
+      log.warn('PuppetWechat4u', 'sendMessageHandler() wechat4u.on(message) no message id: %s', JSON.stringify(msg))
+      throw new Error('no id')
+    }
+    // 如果是消息的创建时间小于机器人启动的时间 直接丢弃
+    if (msg.CreateTime < this.startTime) {
+      // log.warn('PuppetWechat4u', 'initHookEvents() wechat4u.on(message) is history message: %s', JSON.stringify(msg))
+      return
+    }
+    this.cacheMessageRawPayload.set(msg.MsgId, msg)
+    const event = await parseEvent(this, msg)
+    if (event.type === EventType.Message) {
+      this.emit('message', {messageId: msg.MsgId})
+    }
+    return msg.MsgId
   }
 
   private initHookEvents(wechat4u: any) {
@@ -785,13 +804,53 @@ export class PuppetWechat4u extends PUPPET.Puppet {
   override async messageSendText(
     conversationId: string,
     text: string,
-  ): Promise<void> {
+  ): Promise<void | string> {
     log.verbose('PuppetWechat4u', 'messageSend(%s, %s)', conversationId, text)
 
     /**
      * 发送文本消息，可以包含emoji(😒)和QQ表情([坏笑])
      */
-    await this.wechat4u.sendMsg(text, conversationId)
+    const res = await this.wechat4u.sendMsg(text, conversationId);
+
+    const msg: WebMessageRawPayload = {
+      Content: text,
+      CreateTime: Math.floor(Date.now() / 1000),
+      FromUserName: this.wechat4u.user.UserName,
+      ToUserName: conversationId,
+      MsgId: res.MsgID,
+      MsgType: WebMessageType.TEXT,
+      SubMsgType: WebMessageType.ZERO,
+      AppMsgType: WebAppMsgType.TEXT,
+      OriginalContent: text, // ?
+      Status: "3",
+      FileName: "",
+      FileSize: 0,
+      MMActualContent: "",
+      MMActualSender: "",
+      MMAppMsgDesc: "",
+      MMAppMsgDownloadUrl: "",
+      MMAppMsgFileExt: "",
+      MMAppMsgFileSize: "",
+      MMCategory: [],
+      MMDigest: "",
+      MMDisplayTime: 0,
+      MMFileExt: "",
+      MMFileStatus: 0,
+      MMImgStyle: "",
+      MMLocationDesc: "",
+      MMLocationUrl: "",
+      MMPeerUserName: "",
+      MMPreviewSrc: "",
+      MMStatus: 0,
+      MMThumbSrc: "",
+      MMUploadProgress: 0,
+      MediaId: "",
+      Signature: "",
+      VoiceLength: 0,
+      Url: ''
+    }
+
+    return await this.sendMessageHandler(msg)
     /**
      * { BaseResponse: { Ret: 0, ErrMsg: '' },
      *  MsgID: '830582407297708303',
@@ -802,7 +861,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
   override async messageSendFile(
     conversationId: string,
     file: FileBox,
-  ): Promise<void> {
+  ): Promise<void | string> {
     log.verbose('PuppetWechat4u', 'messageSend(%s, %s)', conversationId, file)
 
     /**
@@ -821,10 +880,73 @@ export class PuppetWechat4u extends PUPPET.Puppet {
      * file为多种类型
      * filename必填，主要为了判断文件类型
      */
-    await this.wechat4u.sendMsg({
+    const res = await this.wechat4u.sendMsg({
       file: await file.toStream(),
       filename: file.name,
-    }, conversationId)
+    }, conversationId);
+
+    let ext
+    const extMatch = file.name.match(/.*\.(.*)/)
+    if (extMatch && extMatch[1]) {
+      ext = extMatch[1].toLowerCase()
+    } else {
+      ext = ''
+    }
+
+    let msgType
+    switch (ext) {
+      case 'bmp':
+      case 'jpeg':
+      case 'jpg':
+      case 'png':
+        msgType = WebAppMsgType.IMG
+        break
+      case 'mp4':
+        msgType = WebAppMsgType.VIDEO
+        break
+      default:
+        msgType = WebAppMsgType.ATTACH
+    }
+
+
+    const msg: WebMessageRawPayload = {
+      Content: "",
+      CreateTime: Math.floor(Date.now() / 1000),
+      FromUserName: this.wechat4u.user.UserName,
+      ToUserName: conversationId,
+      MsgId: res.MsgID,
+      MsgType: msgType,
+      SubMsgType: WebMessageType.ZERO,
+      AppMsgType: msgType,
+      OriginalContent: "", // ?
+      Status: "3",
+      FileName: file.name,
+      FileSize: file.size,
+      MMActualContent: "",
+      MMActualSender: "",
+      MMAppMsgDesc: "",
+      MMAppMsgDownloadUrl: "",
+      MMAppMsgFileExt: "",
+      MMAppMsgFileSize: "",
+      MMCategory: [],
+      MMDigest: "",
+      MMDisplayTime: 0,
+      MMFileExt: "",
+      MMFileStatus: 0,
+      MMImgStyle: "",
+      MMLocationDesc: "",
+      MMLocationUrl: "",
+      MMPeerUserName: "",
+      MMPreviewSrc: "",
+      MMStatus: 0,
+      MMThumbSrc: "",
+      MMUploadProgress: 0,
+      MediaId: "",
+      Signature: "",
+      VoiceLength: 0,
+      Url: ''
+    }
+    return this.sendMessageHandler(msg)
   }
 
   override async messageSendContact(

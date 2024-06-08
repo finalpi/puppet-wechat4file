@@ -116,6 +116,7 @@ export enum WebAppMsgType {
  * @property {number} RECALLED            - MsgType.RECALLED            (10002) for RECALLED
  */
 export enum WebMessageType {
+  ZERO                = 0,
   TEXT                = 1,
   IMAGE               = 3,
   VOICE               = 34,
