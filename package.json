@@ -72,7 +72,6 @@
     "file-type": "^16.5.4",
     "promise-retry": "^2.0.1",
     "wechat4u": "^0.7.14",
-    "wechaty-puppet-wechat4u": "file:wechaty-puppet-wechat4u-1.14.20.tgz",
     "xml2js": "^0.4.23"
   },
   "publishConfig": {
