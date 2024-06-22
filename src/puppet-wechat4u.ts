@@ -175,8 +175,9 @@ export class PuppetWechat4u extends PUPPET.Puppet {
         result.forEach((item) => {
           if (isRoomId(item.UserName)) {
             const membersList = item.MemberList.map((mItem: any) => {
+              const {NickName, ...rest} = mItem
               return {
-                ...mItem,
+                ...rest,
                 EncryChatRoomId: item.UserName,
               }
             })
@@ -402,13 +403,15 @@ export class PuppetWechat4u extends PUPPET.Puppet {
       )
       contacts.forEach((item: any) => {
         if (isRoomId(item.UserName)) {
-          const membersList = item.MemberList.map((mItem: any) => {
-            this.unknownContactId.push([mItem.UserName, item.UserName])
-            return {
-              ...mItem,
-              EncryChatRoomId: item.UserName,
-            }
-          })
+          const membersList =
+            item.MemberList.map((mItem: any) => {
+              this.unknownContactId.push([mItem.UserName, item.UserName])
+              const {NickName, ...rest} = mItem
+              return {
+                ...rest,
+                EncryChatRoomId: item.UserName,
+              }
+            })
           this.wechat4u.updateContacts(membersList)
         }
       })
