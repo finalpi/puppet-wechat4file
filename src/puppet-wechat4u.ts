@@ -177,6 +177,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
             const membersList = item.MemberList.map((mItem: any) => {
               const {NickName, ...rest} = mItem
               return {
+                NickName: !this.wechat4u.contacts[mItem.UserName]?.NickName ? mItem.NickName : this.wechat4u.contacts[mItem.UserName]?.NickName,
                 ...rest,
                 EncryChatRoomId: item.UserName,
               }
@@ -408,6 +409,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
               this.unknownContactId.push([mItem.UserName, item.UserName])
               const {NickName, ...rest} = mItem
               return {
+                NickName: !wechat4u.contacts[mItem.UserName]?.NickName ? mItem.NickName : wechat4u.contacts[mItem.UserName]?.NickName,
                 ...rest,
                 EncryChatRoomId: item.UserName,
               }
