@@ -191,6 +191,12 @@ export class PuppetWechat4u extends PUPPET.Puppet {
         log.warn('PuppetWechat4u', 'contactRawPayload(%s) wechat4u.batchGetContact() exception: %s', e)
         // 失败后放回去
         this.unknownContactId.push(...tempArray)
+        if (!this.getContactInterval) {
+          this.getContactsInfo()
+          this.getContactInterval = setInterval(() => {
+            this.getContactsInfo()
+          }, 2000)
+        }
       })
     }
   }
