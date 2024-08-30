@@ -75,7 +75,7 @@ export class PuppetWechat4u extends PUPPET.Puppet {
   private startTime: number = 0
 
   private unknownContactId: string[][] = []
-  private getContactInterval: undefined | NodeJS.Timeout
+  // private getContactInterval: undefined | NodeJS.Timeout
   private _heartBeatTimer?: ReturnType<typeof setTimeout>
 
   private readonly cacheMessageRawPayload: QuickLru<string, WebMessageRawPayload>
@@ -158,12 +158,43 @@ export class PuppetWechat4u extends PUPPET.Puppet {
    * @private
    */
 
-  private getContactsInfo() {
-    const tempArray: string[][] = this.unknownContactId.splice(0, 40)
-    if (tempArray.length === 0 && this.getContactInterval) {
-      clearInterval(this.getContactInterval)
-      this.getContactInterval = undefined
-    }
+  // private getContactsInfo() {
+  //   const tempArray: string[][] = this.unknownContactId.splice(0, 40)
+  //   if (tempArray.length === 0 && this.getContactInterval) {
+  //     clearInterval(this.getContactInterval)
+  //     this.getContactInterval = undefined
+  //   }
+  //   if (tempArray.length) {
+  //     const userDataList = tempArray.map(contact => {
+  //       return {
+  //         EncryChatRoomId: contact[1],
+  //         UserName: contact[0],
+  //       }
+  //     })
+  //     this.wechat4u.batchGetContact(userDataList).then((result: any[]) => {
+  //       result.forEach((item) => {
+  //         if (isRoomId(item.UserName)) {
+  //           const membersList = item.MemberList.map((mItem: any) => {
+  //             const {NickName, ...rest} = mItem
+  //             return {
+  //               NickName: !this.wechat4u.contacts[mItem.UserName]?.NickName ? mItem.NickName : this.wechat4u.contacts[mItem.UserName]?.NickName,
+  //               ...rest,
+  //               EncryChatRoomId: item.UserName,
+  //             }
+  //           })
+  //           this.wechat4u.updateContacts(membersList)
+  //         }
+  //       })
+  //       this.wechat4u.updateContacts(result)
+  //       return null
+  //     }).catch((e: any) => {
+  //       log.warn('PuppetWechat4u', 'contactRawPayload(%s) wechat4u.batchGetContact() exception: %s', e)
+  //     })
+  //   }
+  // }
+
+  private getContactsByUserName (userName:string) {
+    const tempArray: string[][] = this.unknownContactId.filter(it => it[0] === userName)
     if (tempArray.length) {
       const userDataList = tempArray.map(contact => {
         return {
@@ -417,12 +448,12 @@ export class PuppetWechat4u extends PUPPET.Puppet {
           this.wechat4u.updateContacts(membersList)
         }
       })
-      if (!this.getContactInterval) {
-        this.getContactsInfo()
-        this.getContactInterval = setInterval(() => {
-          this.getContactsInfo()
-        }, 2000)
-      }
+      // if (!this.getContactInterval) {
+      //   this.getContactsInfo()
+      //   this.getContactInterval = setInterval(() => {
+      //     this.getContactsInfo()
+      //   }, 2000)
+      // }
     })
     /**
      * 错误事件，参数一般为Error对象
@@ -589,12 +620,12 @@ export class PuppetWechat4u extends PUPPET.Puppet {
 
     if (!(contactId in this.wechat4u.contacts)) {
       this.unknownContactId.push([contactId, ''])
-      if (!this.getContactInterval) {
-        this.getContactsInfo()
-        this.getContactInterval = setInterval(() => {
-          this.getContactsInfo()
-        }, 2000)
-      }
+      // if (!this.getContactInterval) {
+      //   this.getContactsInfo()
+      //   this.getContactInterval = setInterval(() => {
+      //     this.getContactsInfo()
+      //   }, 2000)
+      // }
     }
 
     const rawPayload: WebContactRawPayload = await retry<WebContactRawPayload>(async (retryException, attempt) => {
@@ -802,6 +833,10 @@ export class PuppetWechat4u extends PUPPET.Puppet {
     log.verbose('PuppetWechat4u', 'messageRawPayloadParser(%s) @ %s', rawPayload, this)
 
     // console.log(rawPayload)
+    if (isRoomId(rawPayload.FromUserName)) {
+      const rawContent = rawPayload.Content.split(':')
+      if (rawContent.length > 0 && rawContent[0]) { this.getContactsByUserName(rawContent[0]) }
+    }
     const payload = webMessageToWechaty(this, rawPayload)
     return payload
   }
