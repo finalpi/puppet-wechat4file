@@ -159,46 +159,46 @@ export class PuppetWechat4u extends PUPPET.Puppet {
    */
 
   private getContactsInfo() {
-    const tempArray: string[][] = this.unknownContactId.splice(0, 40)
-    if (tempArray.length === 0 && this.getContactInterval) {
-      clearInterval(this.getContactInterval)
-      this.getContactInterval = undefined
-    }
-    if (tempArray.length) {
-      const userDataList = tempArray.map(contact => {
-        return {
-          EncryChatRoomId: contact[1],
-          UserName: contact[0],
-        }
-      })
-      this.wechat4u.batchGetContact(userDataList).then((result: any[]) => {
-        result.forEach((item) => {
-          if (isRoomId(item.UserName)) {
-            const membersList = item.MemberList.map((mItem: any) => {
-              const {NickName, ...rest} = mItem
-              return {
-                NickName: !this.wechat4u.contacts[mItem.UserName]?.NickName ? mItem.NickName : this.wechat4u.contacts[mItem.UserName]?.NickName,
-                ...rest,
-                EncryChatRoomId: item.UserName,
-              }
-            })
-            this.wechat4u.updateContacts(membersList)
-          }
-        })
-        this.wechat4u.updateContacts(result)
-        return null
-      }).catch((e: any) => {
-        log.warn('PuppetWechat4u', 'contactRawPayload(%s) wechat4u.batchGetContact() exception: %s', e)
-        // 失败后放回去
-        this.unknownContactId.push(...tempArray)
-        if (!this.getContactInterval) {
-          this.getContactsInfo()
-          this.getContactInterval = setInterval(() => {
-            this.getContactsInfo()
-          }, 2000)
-        }
-      })
-    }
+  //   const tempArray: string[][] = this.unknownContactId.splice(0, 40)
+  //   if (tempArray.length === 0 && this.getContactInterval) {
+  //     clearInterval(this.getContactInterval)
+  //     this.getContactInterval = undefined
+  //   }
+  //   if (tempArray.length) {
+  //     const userDataList = tempArray.map(contact => {
+  //       return {
+  //         EncryChatRoomId: contact[1],
+  //         UserName: contact[0],
+  //       }
+  //     })
+  //     this.wechat4u.batchGetContact(userDataList).then((result: any[]) => {
+  //       result.forEach((item) => {
+  //         if (isRoomId(item.UserName)) {
+  //           const membersList = item.MemberList.map((mItem: any) => {
+  //             const {NickName, ...rest} = mItem
+  //             return {
+  //               NickName: !this.wechat4u.contacts[mItem.UserName]?.NickName ? mItem.NickName : this.wechat4u.contacts[mItem.UserName]?.NickName,
+  //               ...rest,
+  //               EncryChatRoomId: item.UserName,
+  //             }
+  //           })
+  //           this.wechat4u.updateContacts(membersList)
+  //         }
+  //       })
+  //       this.wechat4u.updateContacts(result)
+  //       return null
+  //     }).catch((e: any) => {
+  //       log.warn('PuppetWechat4u', 'contactRawPayload(%s) wechat4u.batchGetContact() exception: %s', e)
+  //       // 失败后放回去
+  //       this.unknownContactId.push(...tempArray)
+  //       if (!this.getContactInterval) {
+  //         this.getContactsInfo()
+  //         this.getContactInterval = setInterval(() => {
+  //           this.getContactsInfo()
+  //         }, 2000)
+  //       }
+  //     })
+  //   }
   }
 
   private getContactsByUserName (userName:string) {
