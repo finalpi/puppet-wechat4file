@@ -71,7 +71,7 @@
     "fast-xml-parser": "^3.21.1",
     "file-type": "^16.5.4",
     "promise-retry": "^2.0.1",
-    "wechat4u": "https://github.com/Nimbly8836/wechat4u/releases/download/v0.7.16/wechat4u-0.7.16.tgz",
+    "wechat4u": "https://github.com/finalpi/wechat4filehelper/releases/download/0.7.14/wechat4u-0.7.14.tgz",
     "xml2js": "^0.4.23"
   },
   "publishConfig": {
