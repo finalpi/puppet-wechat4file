@@ -1,58 +1,40 @@
-name: Package and Release
+name: Build and Version Bump
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
+    branches:
+      - main # 指定监控的分支
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-        node-version:
-          - 16
-
-    runs-on: ${{ matrix.os }}
+  build-and-publish:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      # 检出代码
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
+      # 设置 Node.js 环境
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
+          cache: 'npm'
 
-      - name: Install dependencies
+      # 安装依赖
+      - name: Install Dependencies
         run: npm install
 
-      - name: Run dict
-        run: npm run dist
+      # 构建项目
+      - name: Build Project
+        run: npm run build
 
-      - name: Run pack script
-        run: |
-          tarball=$(npm pack)
-          echo "TARBALL_NAME=$tarball" >> $GITHUB_ENV
+      # 打包成 tgz
+      - name: Create .tgz Package
+        run: npm pack
 
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Package
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
-
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.TARBALL_NAME }}
-          asset_name: ${{ env.TARBALL_NAME }}
-          tag: ${{ github.ref }}
-          overwrite: true
-          body: "This is my release text"
+          name: package-tgz
+          path: "*.tgz"
