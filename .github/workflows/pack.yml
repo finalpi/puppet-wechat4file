@@ -29,6 +29,9 @@ jobs:
       - name: Build Project
         run: npm run build
 
+      - name: Dist Project
+        run: npm run dist
+
       # 打包成 tgz
       - name: Create .tgz Package
         run: npm pack
