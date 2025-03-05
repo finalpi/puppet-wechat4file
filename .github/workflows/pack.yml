@@ -26,9 +26,6 @@ jobs:
         run: npm install
 
       # 构建项目
-      - name: Build Project
-        run: npm run build
-
       - name: Dist Project
         run: npm run dist
 
